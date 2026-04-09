@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Agent Chat</title>
+    <style>
+        #chat-box { height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        .user { color: blue; font-weight: bold; }
+        .agent { color: green; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div style="background: #eee; padding: 5px; font-family: monospace;">
+        Current Session: <span id="session-display">None</span>
+    </div>
+    <h2>Talk to my_agent</h2>
+    <div id="chat-box"></div>
+    <input type="text" id="user-input" placeholder="Type a message...">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById('user-input');
+            const chatBox = document.getElementById('chat-box');
+            const message = input.value;
+            if (!message) return;
+
+            // 1. Show user message
+            chatBox.innerHTML += `<p class="user">You: ${message}</p>`;
+            input.value = '';
+
+            // 2. Call your Flask wrapper
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ message: message })
+            });
+            const data = await response.json();
+
+            // 3. Show Agent response (extracting text from ADK format)
+            //const agentText = data.agent_answer[0].text || "No response";
+            //chatBox.innerHTML += `<p class="agent">Agent: ${agentText}</p>`;
+            //chatBox.scrollTop = chatBox.scrollHeight;
+            // Digging through the ADK layers:
+            try {
+                // 1. Get the first event in the list
+                const firstEvent = data.agent_answer[0];
+                
+                // 2. Access content -> parts -> first part -> text
+                const agentText = firstEvent.content.parts[0].text;
+
+                document.getElementById('session-display').innerText = data.session_id;
+                
+                chatBox.innerHTML += `<p class="agent">Agent: ${agentText.replace(/\n/g, '<br>')}</p>`;
+            } catch (error) {
+                console.error("Parsing error:", error);
+                chatBox.innerHTML += `<p class="agent">Agent: [Error parsing response]</p>`;
+            }
+                    
+        }
+    </script>
+</body>
+</html>

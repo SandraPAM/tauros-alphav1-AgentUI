@@ -1,0 +1,20 @@
+# Python System Files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Google ADK Folders
+.adk/
+**/artifacts/
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environments
+.env

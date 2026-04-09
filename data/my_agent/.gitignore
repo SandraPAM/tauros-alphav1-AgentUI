@@ -1,0 +1,7 @@
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# ADK Local Storage (Crucial to ignore so you don't leak session history)
+.adk/
+session.db
